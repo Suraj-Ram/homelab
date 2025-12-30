@@ -1,0 +1,8 @@
+# Blacklist all .env files
+.env
+*.env
+**/.env
+
+# But allow .env.example files
+!.env.example
+!**/.env.example
