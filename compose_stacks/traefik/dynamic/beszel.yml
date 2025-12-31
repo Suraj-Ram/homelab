@@ -1,0 +1,22 @@
+http:
+  routers:
+    beszel:
+      rule: "Host(`mainserv.liger-interval.ts.net`) && PathPrefix(`/beszel`)"
+      service: beszel
+      entryPoints:
+        - websecure
+      middlewares:
+        - beszel-stripprefix
+      tls: {}
+
+  middlewares:
+    beszel-stripprefix:
+      stripPrefix:
+        prefixes:
+          - "/beszel"
+
+  services:
+    beszel:
+      loadBalancer:
+        servers:
+          - url: "http://192.168.1.34:8090"
