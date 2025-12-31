@@ -32,8 +32,8 @@ services:
   app:
     image: ${HDX_IMAGE_REPO}/${IMAGE_NAME_DOCKERHUB}:${IMAGE_VERSION}
     ports:
-      - ${HYPERDX_API_PORT}:${HYPERDX_API_PORT}
-      - ${HYPERDX_APP_PORT}:${HYPERDX_APP_PORT}
+      - 8001:8000
+      - 8081:8080
     environment:
       FRONTEND_URL: ${HYPERDX_APP_URL}:${HYPERDX_APP_PORT}
       HYPERDX_API_PORT: ${HYPERDX_API_PORT}
