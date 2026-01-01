@@ -4,7 +4,7 @@ http:
       rule: "Host(`mainserv.liger-interval.ts.net`) && PathPrefix(`/beszel`)"
       service: beszel
       entryPoints:
-        - websecure
+        - web
       middlewares:
         - beszel-stripprefix
       tls: {}
