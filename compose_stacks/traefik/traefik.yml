@@ -1,11 +1,47 @@
 # traefik.yml
+experimental:
+  otlpLogs: true
+
 api:
   insecure: true
 entryPoints:
   web:
     address: ":80"
+  metrics:
+    address: ":9082"
 providers:
   docker: {}
   file:
     directory: /etc/traefik/dynamic
     watch: true
+  
+ping: {}
+
+log:
+  level: INFO
+
+accessLog:
+  format: json
+  otlp:
+    grpc:
+      endpoint: "otel-collector:4317"
+      insecure: true
+      headers:
+        authorization: "d5b88292-a9dd-45e2-b9f7-e27a095d2f81"
+
+metrics:
+  otlp:
+    grpc:
+        endpoint: "otel-collector:4317"
+        insecure: true
+        headers:
+          authorization: "d5b88292-a9dd-45e2-b9f7-e27a095d2f81"
+
+  # Nothing is scraping /metrics for now
+  prometheus:
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+    entryPoint: metrics
+
+# TODO add otel tracing
