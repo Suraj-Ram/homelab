@@ -5,10 +5,15 @@ services:
     ports:
       - "80:80"
       - "8080:8080"
+      - "9082:9082"  # Metrics for Prometheus scraping
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./traefik.yml:/etc/traefik/traefik.yml
       - ./dynamic:/etc/traefik/dynamic
+    networks:
+      - default
+      - clickstack_network  # Connect to Clickstack
+
   whoami:
     image: traefik/whoami
     restart: always
@@ -16,3 +21,9 @@ services:
       - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"
       - "traefik.http.routers.whoami.middlewares=whoami-stripprefix"
       - "traefik.http.middlewares.whoami-stripprefix.stripprefix.prefixes=/whoami"
+    # whoami only needs default network (Traefik will route to it)
+
+networks:
+  clickstack_network:
+    external: true
+    name: clickstack-stack_internal  # Reference Clickstack's network
