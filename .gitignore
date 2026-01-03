@@ -6,3 +6,8 @@
 # But allow .env.example files
 !.env.example
 !**/.env.example
+
+
+# Compose volumes
+
+compose_stacks/clickstack/.volumes
