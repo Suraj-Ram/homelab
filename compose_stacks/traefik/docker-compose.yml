@@ -1,6 +1,7 @@
 services:
   traefik:
     image: traefik:v3.6
+    restart: always
     ports:
       - "80:80"
       - "8080:8080"
@@ -10,6 +11,7 @@ services:
       - ./dynamic:/etc/traefik/dynamic
   whoami:
     image: traefik/whoami
+    restart: always
     labels:
       - "traefik.http.routers.whoami.rule=PathPrefix(`/whoami`)"
       - "traefik.http.routers.whoami.middlewares=whoami-stripprefix"
