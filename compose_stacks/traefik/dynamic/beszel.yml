@@ -1,21 +1,30 @@
 http:
   routers:
+    hello-router:
+      rule: "PathPrefix(`/hello`)"
+      service: hello-service
+      entryPoints:
+        - web
     beszel:
-      rule: "Host(`mainserv.liger-interval.ts.net`) && PathPrefix(`/beszel`)"
+      # Doesnt work for now since the base path needs to be set on the beszel hub host
+      rule: "PathPrefix(`/beszel`)"
       service: beszel
       entryPoints:
         - web
       middlewares:
         - beszel-stripprefix
-      tls: {}
 
   middlewares:
     beszel-stripprefix:
       stripPrefix:
         prefixes:
-          - "/beszel"
+          - /beszel
 
   services:
+    hello-service:
+      loadBalancer:
+        servers:
+          - url: "http://httpbin.org"
     beszel:
       loadBalancer:
         servers:
