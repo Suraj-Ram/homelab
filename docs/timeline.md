@@ -2,6 +2,14 @@
 
 Newest first. Prepend an entry when something is installed, updated, or removed on the host. Do not rewrite older entries.
 
+## 2026-10-04 — glances
+
+- Action: installed
+- Kind: container
+- Persistence: `/mnt/user/compose/glances/docker-compose.yml`. The repo copy is `compose_stacks/glances/docker-compose.yml`. No appdata volume.
+- What: Glances 4.5.7 web UI from `nicolargo/glances:4.5.7-full`, host network and host PID. Listening on port 61208. `/api/4/status` returned `{"version": "4.5.7"}` and the container health check is healthy.
+- Remove: `docker compose -f /mnt/user/compose/glances/docker-compose.yml down` and delete `/mnt/user/compose/glances`
+
 ## 2026-10-04 — docker compose
 
 - Action: installed

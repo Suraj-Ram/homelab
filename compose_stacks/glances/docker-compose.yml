@@ -1,0 +1,21 @@
+services:
+  glances:
+    image: nicolargo/glances:4.5.7-full
+    container_name: glances
+    restart: unless-stopped
+    pid: host
+    network_mode: host
+    environment:
+      TZ: America/New_York
+      GLANCES_OPT: "-w"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+      - /mnt/user:/mnt/user:ro
+      - /boot:/boot:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:61208/api/4/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
