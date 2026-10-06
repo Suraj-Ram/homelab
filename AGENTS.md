@@ -13,6 +13,26 @@ The host root filesystem, including `/root`, is a RAM disk. Files that must surv
 
 Leave every other share alone unless asked. Services run as Docker containers on this host. Before changing one, run `docker ps` over `ssh nas`.
 
+## Repo checkout
+
+Clone this repo on the host to `/mnt/cache/compose/homelab`. That directory is the source tree. See `docs/decisions/0001-nas-git-checkout.md`.
+
+`/mnt` on this host contains `cache`, `disk1`, `user`, and `user0`. There is no `/mnt/compose`. The `compose` share is cache-only, so `/mnt/user/compose` and `/mnt/cache/compose` are the same files. Git uses the cache-disk path. Checkouts through `/mnt/user` go through the FUSE share layer, which mishandles how git reads and writes its own files.
+
+Leave `/mnt/cache/compose` as the live stack directory. Stacks stay in `/mnt/cache/compose/<stack>/` (`glances` is there now). The repo root is `compose_stacks/`, `docs/`, and `archived/`, so the checkout is a subdirectory beside those stacks.
+
+`/usr/bin/git` ships with Unraid and is present after reboot. The remote is public: `https://github.com/Suraj-Ram/homelab.git`. No deploy key.
+
+Edit and commit on the workstation. The owner pushes. On the NAS, update with `git -C /mnt/cache/compose/homelab pull --ff-only`. Keep that pull out of `/boot/config/go`.
+
+If `/mnt/cache/compose/homelab` is missing:
+
+```bash
+git clone https://github.com/Suraj-Ram/homelab.git /mnt/cache/compose/homelab
+```
+
+`.env` files stay gitignored beside the compose file that needs them. Appdata stays in `/mnt/user/appdata`.
+
 ## Host binaries
 
 Unraid loads the OS into RAM, so anything installed under `/usr` or `/root` disappears on reboot. Since Unraid 6.8, files on the boot device cannot be given execute permission, so a binary on the flash drive will not run from `/boot`. See [Securing your boot device](https://docs.unraid.net/unraid-os/system-administration/secure-your-server/secure-your-boot-drive/).
