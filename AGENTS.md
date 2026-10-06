@@ -19,7 +19,14 @@ Clone this repo on the host to `/mnt/cache/compose/homelab`. That directory is t
 
 `/mnt` on this host contains `cache`, `disk1`, `user`, and `user0`. There is no `/mnt/compose`. The `compose` share is cache-only, so `/mnt/user/compose` and `/mnt/cache/compose` are the same files. Git uses the cache-disk path. Checkouts through `/mnt/user` go through the FUSE share layer, which mishandles how git reads and writes its own files.
 
-Leave `/mnt/cache/compose` as the live stack directory. Stacks stay in `/mnt/cache/compose/<stack>/` (`glances` is there now). The repo root is `compose_stacks/`, `docs/`, and `archived/`, so the checkout is a subdirectory beside those stacks.
+Run stacks from the checkout. Do not copy a compose file out to `/mnt/cache/compose/<stack>/`. See `docs/decisions/0002-compose-from-checkout.md`.
+
+```bash
+git -C /mnt/cache/compose/homelab pull --ff-only
+docker compose -f /mnt/cache/compose/homelab/compose_stacks/<stack>/docker-compose.yml up -d
+```
+
+The project name is the directory that contains the compose file (`glances` for Glances). Compose uses that name to find the existing container. `.env` files stay gitignored beside the compose file that needs them. Appdata stays in `/mnt/user/appdata`.
 
 `/usr/bin/git` ships with Unraid and is present after reboot. The remote is public: `https://github.com/Suraj-Ram/homelab.git`. No deploy key.
 
@@ -30,8 +37,6 @@ If `/mnt/cache/compose/homelab` is missing:
 ```bash
 git clone https://github.com/Suraj-Ram/homelab.git /mnt/cache/compose/homelab
 ```
-
-`.env` files stay gitignored beside the compose file that needs them. Appdata stays in `/mnt/user/appdata`.
 
 ## Host binaries
 

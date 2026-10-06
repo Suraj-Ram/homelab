@@ -1,0 +1,14 @@
+services:
+  golink:
+    image: ghcr.io/tailscale/golink:main
+    container_name: golink
+    restart: unless-stopped
+    environment:
+      TZ: America/New_York
+    volumes:
+      - data:/home/nonroot
+
+volumes:
+  data:
+    # Docker volume created by the Portainer project ts_golink. Holds golink.db and tsnet state.
+    name: ts_golink_data
