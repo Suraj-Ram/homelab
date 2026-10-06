@@ -1,0 +1,19 @@
+services:
+  hermes-webui:
+    image: ghcr.io/nesquena/hermes-webui:exp-v0.52.420
+    container_name: hermes-webui
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    volumes:
+      - /mnt/user/appdata/hermes:/home/hermeswebui/.hermes
+      - /mnt/cache/compose/homelab:/workspace
+    environment:
+      TZ: America/New_York
+      WANTED_UID: "10000"
+      WANTED_GID: "10000"
+      HERMES_WEBUI_HOST: "0.0.0.0"
+      HERMES_WEBUI_PORT: "8787"
+      HERMES_WEBUI_STATE_DIR: /home/hermeswebui/.hermes/webui
+      HERMES_WEBUI_PASSWORD: ${HERMES_WEBUI_PASSWORD}
+      HERMES_SKIP_CHMOD: "1"
