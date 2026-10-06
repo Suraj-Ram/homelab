@@ -15,6 +15,19 @@ services:
       HERMES_DASHBOARD_BASIC_AUTH_USERNAME: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
       HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
       HERMES_DASHBOARD_BASIC_AUTH_SECRET: ${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
+    # The gateway API binds 127.0.0.1 inside the container, so host port 8642
+    # resets. The dashboard on 9119 answers on the host and reports gateway_running.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl -fsS http://127.0.0.1:9119/api/health >/dev/null
+          && curl -fsS http://127.0.0.1:9119/api/status
+          | grep -Eq '"gateway_running"[[:space:]]*:[[:space:]]*true'
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     # not supported in kernel version
     # deploy:
     #   resources:
