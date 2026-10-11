@@ -67,6 +67,16 @@ fi
 
 Leave the flash copy non-executable. Keep logs and other frequently written files off `/boot/config/binaries/`.
 
+## Traefik
+
+`compose_stacks/traefik/` is a minimal stack for learning. The design to return to is `docs/decisions/0003-traefik-host-ports.md`. The Compose file, routes, and hermes labels for that design are in git stash `traefik: full DNS-01 setup for surajram.online`. Restore them with:
+
+```bash
+git stash apply stash^{/traefik: full DNS-01}
+```
+
+That stash overwrites the learning stack and the hermes compose files. It is local to this workstation.
+
 ## Working in this repo
 
 - Keep secrets out of git. `.env` files stay untracked. Name variables, not values.
