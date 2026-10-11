@@ -12,6 +12,14 @@ http:
       tls:
         certResolver: my-resolver
 
+    grafana:
+      rule: Host(`grafana.surajram.online`)
+      entryPoints:
+        - websecure
+      service: grafana
+      tls:
+        certResolver: my-resolver
+
   # TODO: Investigate identity-aware access and narrower Tailscale ranges before
   # enabling this management-access middleware.
   # middlewares:
@@ -27,3 +35,8 @@ http:
         passHostHeader: true
         servers:
           - url: http://10.0.0.51:8080
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: http://10.0.0.51:3003

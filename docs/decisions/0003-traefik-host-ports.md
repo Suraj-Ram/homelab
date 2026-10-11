@@ -28,7 +28,9 @@ Unraid does not officially support putting its WebGUI behind a reverse proxy. It
 
 The proposed `management-access` IP allowlist remains commented out. Before enabling it, investigate identity-aware access and verify how source addresses are preserved for LAN and Tailscale clients. Do not expose the Unraid route through a router WAN port-forward.
 
-The external Docker network `traefik-net` was created on the host with `docker network create traefik-net`. Traefik and Docker services it proxies must explicitly join that network. At present, only the example web application is routed this way. The file provider currently routes only the Unraid WebGUI.
+The external Docker network `traefik-net` was created on the host with `docker network create traefik-net`. Traefik and Docker services it proxies must explicitly join that network. At present, only the example web application is routed this way.
+
+The file provider routes the Unraid WebGUI and the Unraid-managed Grafana container through their published host ports. Grafana uses `http://10.0.0.51:3003` as its backend and must set `GF_SERVER_ROOT_URL=http://grafana.surajram.online` in its Unraid template so generated links and redirects use the public URL.
 
 Traefik writes ACME state inside the container to `/var/traefik/certs/cloudflare-acme.json`; the file is mode 600. The current Compose file mounts `./data/certs` there, so the live host file is:
 
