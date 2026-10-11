@@ -2,41 +2,43 @@
 
 ## Context
 
-Unraid's nginx listens on ports 80 and 443 of `10.0.0.51` and of the Tailscale address. The UI is HTTP because Use SSL/TLS is No. Port 443 is still taken by the Tailscale certificate for `s-nas.liger-interval.ts.net`. `surajram.online` is delegated to Cloudflare. Its apex A record is `10.0.0.51`, DNS only. There is no wildcard record.
+Unraid's nginx originally listened on ports 80 and 443 of `10.0.0.51` and the Tailscale address. Traefik needs host ports 80 and 443 for normal HTTP and HTTPS URLs.
+
+`surajram.online` is delegated to Cloudflare. The apex and wildcard DNS records resolve to `10.0.0.51` and remain DNS-only so access stays on the LAN. They can later point to the NAS Tailscale address if access should instead be limited to the tailnet.
 
 ## Options
 
 1. Give Traefik its own address on the `br0` macvlan, and leave the Unraid UI on 80 and 443.
-2. Move the Unraid UI to 8080 and 8443, publish Traefik on 80 and 443, and issue a DNS-01 certificate for `surajram.online` and `*.surajram.online`.
+2. Move the Unraid UI to 8080 and 8443, publish Traefik on 80 and 443, and issue DNS-01 certificates for routed `surajram.online` hostnames.
 3. Run Traefik inside a Tailscale container so it has its own tailnet address.
 
 ## Choice
 
-Option 2. The UI moves in **Settings → Management Access** before this stack starts: HTTP port `8080`, HTTPS port `8443`, Use SSL/TLS left at No. Traefik then publishes 80 and 443. `https://surajram.online` proxies to `http://10.0.0.51:8080`.
+Option 2. In **Settings → Management Access**, the Unraid HTTP port is `8080`, the HTTPS port is `8443`, and Use SSL/TLS remains No. Traefik publishes ports 80 and 443 and redirects HTTP to HTTPS.
 
-One certificate covers the apex and the wildcard. The Cloudflare token is `CF_DNS_API_TOKEN` in the untracked `.env`. Propagation checks use `1.1.1.1` and `8.8.8.8`.
+`https://unraid.surajram.online` is a file-provider route to `http://10.0.0.51:8080`. The file provider is required because the Unraid WebGUI is a host service rather than a Docker container. The HTTPS service on port 8443 is not proxied; it remains direct recovery and Tailscale access at `https://s-nas.liger-interval.ts.net:8443`.
 
-Add a DNS-only A record `*.surajram.online` to the same address as the apex. Both records can later change from `10.0.0.51` to `100.81.134.74` without a Traefik change. They stay DNS only. Backends in the file provider stay on `10.0.0.51`, because Traefik is on the NAS.
+Each TLS router requests its own certificate through the `my-resolver` ACME resolver. It uses Cloudflare DNS-01 with `CF_DNS_API_TOKEN` from the untracked `.env`; challenge TXT records are temporary and are deleted after validation. Propagation checks use `1.1.1.1:53` and `8.8.8.8:53`. The ACME account email is configured in `traefik.yml`.
+
+`unraid.surajram.online` must resolve to `10.0.0.51`. File-provider backends continue to use `10.0.0.51`, because Traefik runs on the NAS.
 
 ## Consequences
 
-`https://s-nas.liger-interval.ts.net` is served by Unraid on port 8443. Let's Encrypt cannot issue a certificate for that name. `http://10.0.0.51:8080` still reaches the UI without Traefik.
+Unraid does not officially support putting its WebGUI behind a reverse proxy. It ignores `X-Forwarded-Proto` when generating some redirects, so it can redirect an HTTPS request to an HTTP URL. Traefik's entry-point redirect sends that request back to HTTPS, at the cost of an extra round trip. Direct access through port 8443 remains the recovery path. Unraid serves a Let's Encrypt certificate obtained through Tailscale for `s-nas.liger-interval.ts.net`.
 
-The Docker network `traefik-net` was created on the host with `docker network create traefik-net`. Compose stacks join that existing network. The hermes and hermes-webui stacks join it and label their routers. Their published host ports stay until each name works over HTTPS. Golink, iperf3, and the hermes gateway on container port 8642 are not routed. The gateway binds `127.0.0.1` inside the container.
+The proposed `management-access` IP allowlist remains commented out. Before enabling it, investigate identity-aware access and verify how source addresses are preserved for LAN and Tailscale clients. Do not expose the Unraid route through a router WAN port-forward.
 
-Grafana, Dockhand, and Glances are reached through the file provider at their current host ports. Grafana may need its root URL set to `https://grafana.surajram.online` in the Unraid template before links stay on that name.
+The external Docker network `traefik-net` was created on the host with `docker network create traefik-net`. Traefik and Docker services it proxies must explicitly join that network. At present, only the example web application is routed this way. The file provider currently routes only the Unraid WebGUI.
 
-Certificates live in `/mnt/user/appdata/traefik/acme.json`. The dashboard user file is `/mnt/user/appdata/traefik/dashboard-users`, one `htpasswd` line, bcrypt. Create both before the first start. `acme.json` must be mode 600, and an empty file is enough.
+Traefik writes ACME state inside the container to `/var/traefik/certs/cloudflare-acme.json`; the file is mode 600. The current Compose file mounts `./data/certs` there, so the live host file is:
 
-```bash
-mkdir -p /mnt/user/appdata/traefik
-touch /mnt/user/appdata/traefik/acme.json
-chmod 600 /mnt/user/appdata/traefik/acme.json
-docker run --rm httpd:2.4 htpasswd -nbB admin 'choose-a-password' > /mnt/user/appdata/traefik/dashboard-users
-chmod 600 /mnt/user/appdata/traefik/dashboard-users
+```text
+/mnt/cache/compose/homelab/compose_stacks/traefik/data/certs/cloudflare-acme.json
 ```
 
-Copy `compose_stacks/traefik/.env.example` to `.env` and set `ACME_EMAIL` and `CF_DNS_API_TOKEN`. Then:
+This survives reboot because the checkout is on the cache-backed `compose` share, but it conflicts with the repository policy that runtime data belongs under `/mnt/user/appdata`. The Compose mount and existing ACME file still need to be migrated to `/mnt/user/appdata/traefik/certs` in a separate change.
+
+Copy `compose_stacks/traefik/.env.example` to `.env` and set `CF_DNS_API_TOKEN`. Then deploy with:
 
 ```bash
 docker compose -f /mnt/cache/compose/homelab/compose_stacks/traefik/docker-compose.yml up -d

@@ -1,0 +1,29 @@
+http:
+  routers:
+    unraid:
+      rule: Host(`unraid.surajram.online`)
+      entryPoints:
+        - websecure
+      service: unraid
+      # TODO: Investigate stronger management access controls and source-IP
+      # handling before enabling this middleware.
+      # middlewares:
+      #   - management-access
+      tls:
+        certResolver: my-resolver
+
+  # TODO: Investigate identity-aware access and narrower Tailscale ranges before
+  # enabling this management-access middleware.
+  # middlewares:
+  #   management-access:
+  #     ipAllowList:
+  #       sourceRange:
+  #         - 10.0.0.0/24
+  #         - 100.64.0.0/10
+
+  services:
+    unraid:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://10.0.0.51:8080
