@@ -6,7 +6,7 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.example-http.rule=Host(`example.s-nas.local`) # Select a hostname for routing
+      - traefik.http.routers.example-http.rule=Host(`example.surajram.online`) # Select a hostname for routing
       - traefik.http.routers.example-http.entrypoints=web # Pick a entrypoint
 # Attach to Traefik
 networks:
