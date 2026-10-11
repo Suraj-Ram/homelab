@@ -12,7 +12,7 @@ services:
       - traefik.http.routers.example-https.rule=Host(`example.surajram.online`)
       - traefik.http.routers.example-https.tls=true
       - traefik.http.routers.example-https.tls.certresolver=my-resolver
-      - traefik.http.routers.example-https.entrypoint=websecure
+      - traefik.http.routers.example-https.entrypoints=websecure
     networks:
       - traefik-net
 # Attach to Traefik
