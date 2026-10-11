@@ -18,7 +18,7 @@ entryPoints:
 certificatesResolvers:
   my-resolver:
     acme:
-      email: admin@example.com
+      email: email@surajram.online
       storage: /var/traefik/certs/cloudflare-acme.json # this needs to be in a volume
       caServer: https://acme-v02.api.letsencrypt.org/directory
       keyType: EC256
