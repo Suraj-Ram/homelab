@@ -1,0 +1,14 @@
+---
+services:
+  web-application:
+    container_name: ex-web-app
+    image: nginxdemos/hello:latest
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.example-http.rule=Host(`example.s-nas.local`) # Select a hostname for routing
+      - traefik.http.routers.example-http.entrypoints=web # Pick a entrypoint
+# Attach to Traefik
+networks:
+  traefik-net:
+    external: true
