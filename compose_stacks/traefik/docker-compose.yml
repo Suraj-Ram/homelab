@@ -9,8 +9,11 @@ services:
       - "80:80"
       - "443:443"
       - "8081:8080" # Used for insecure Traefik dashboard
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/certs:/var/traefik/certs:rw
       - ./traefik.yml:/etc/traefik/traefik.yml:ro
     networks:
       - traefik-net

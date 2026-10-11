@@ -9,6 +9,10 @@ services:
       - traefik.docker.network=traefik-net # This is optional, only used if there are multiple Traefik docker networks
       - traefik.http.routers.example-http.rule=Host(`example.surajram.online`) # Select a hostname for routing
       - traefik.http.routers.example-http.entrypoints=web # Pick a entrypoint
+      - traefik.http.routers.example-https.rule=Host(`example.surajram.online`)
+      - traefik.http.routers.example-https.tls=true
+      - traefik.http.routers.example-https.tls.certresolver=my-resolver
+      - traefik.http.routers.example-https.entrypoint=websecure
     networks:
       - traefik-net
 # Attach to Traefik

@@ -14,6 +14,19 @@ entryPoints:
     address: ":80"
   websecure:
     address: ":443"
+  
+certificatesResolvers:
+  my-resolver:
+    acme:
+      email: admin@example.com
+      storage: /var/traefik/certs/cloudflare-acme.json # this needs to be in a volume
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      keyType: EC256
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - "1.1.1.1:53"
+          - "8.8.8.8:53"
 
 providers:
   docker:
