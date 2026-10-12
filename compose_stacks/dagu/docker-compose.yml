@@ -23,7 +23,7 @@ services:
       DOCKER_GID: "281"
     volumes:
       - /mnt/user/appdata/dagu:/var/lib/dagu
-      - ./dags:/var/lib/dagu/dags:ro
+      - ./dags:/var/lib/dagu/dags
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - traefik-net
