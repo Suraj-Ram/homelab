@@ -1,0 +1,6 @@
+name: hello
+description: Confirm the scheduler. Run it from the Web UI.
+
+steps:
+  - id: greet
+    run: echo "dagu is running"

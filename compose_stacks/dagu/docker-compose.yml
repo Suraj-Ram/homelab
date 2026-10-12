@@ -1,0 +1,42 @@
+services:
+  dagu:
+    image: ghcr.io/dagucloud/dagu:2.19.2
+    container_name: dagu
+    restart: unless-stopped
+    environment:
+      TZ: America/New_York
+      DAGU_TZ: America/New_York
+      DAGU_HOST: 0.0.0.0
+      DAGU_PORT: "8080"
+      DAGU_HOME: /var/lib/dagu
+      DAGU_DAGS_DIR: /var/lib/dagu/dags
+      DAGU_AUTH_MODE: builtin
+      DAGU_COORDINATOR_ENABLED: "false"
+      DAGU_DEBUG: "true"
+      DAGU_PUBLIC_URL: https://dagu.surajram.online
+      # Unraid nobody:users, so appdata stays readable on the share.
+      PUID: "99"
+      PGID: "100"
+    volumes:
+      - /mnt/user/appdata/dagu:/var/lib/dagu
+      - ./dags:/var/lib/dagu/dags:ro
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-net
+      - traefik.http.routers.dagu.rule=Host(`dagu.surajram.online`)
+      - traefik.http.routers.dagu.entrypoints=websecure
+      - traefik.http.routers.dagu.tls=true
+      - traefik.http.routers.dagu.tls.certresolver=my-resolver
+      - traefik.http.services.dagu.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  traefik-net:
+    external: true
