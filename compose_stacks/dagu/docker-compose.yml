@@ -10,6 +10,8 @@ services:
       DAGU_PORT: "8080"
       DAGU_HOME: /var/lib/dagu
       DAGU_DAGS_DIR: /var/lib/dagu/dags
+      # Startup creates this directory. The DAG mount is read-only, so keep it on appdata.
+      DAGU_WIKI_DIR: /var/lib/dagu/wiki
       DAGU_AUTH_MODE: builtin
       DAGU_COORDINATOR_ENABLED: "false"
       DAGU_DEBUG: "true"

@@ -35,7 +35,7 @@ Option 2 for the process, option 3 for workflow files, and option 2 for Docker.
 
 The container can run commands, HTTP calls, and SSH from workflow YAML. It cannot start sibling containers until the Docker socket is mounted and `DOCKER_GID` is set to the host Docker group. Do that only for workflows that should control the host Docker daemon.
 
-A read-only DAG mount means the Web UI can run workflows and read logs, and it cannot save YAML. Change a workflow in this repo, then pull on the NAS.
+A read-only DAG mount means the Web UI can run workflows and read logs, and it cannot save YAML. Change a workflow in this repo, then pull on the NAS. Dagu creates a wiki directory at startup under the DAG directory, so `DAGU_WIKI_DIR` points at `/var/lib/dagu/wiki` on the appdata mount.
 
 There is no host port for Dagu. If Traefik is down, the UI is down with it. `docker exec` into the container can still run the `dagu` CLI against `/var/lib/dagu`.
 
