@@ -21,6 +21,10 @@ Clone this repo on the host to `/mnt/cache/compose/homelab`. That directory is t
 
 Run stacks from the checkout. Do not copy a compose file out to `/mnt/cache/compose/<stack>/`. See `docs/decisions/0002-compose-from-checkout.md`.
 
+The NAS checkout is updated only by `git pull --ff-only` of a commit the owner has pushed. Do not write that tree any other way. Do not `scp`, `rsync`, or edit tracked files there over `ssh nas`. Do not `docker compose up`, recreate a container, or change a live Traefik route from a file that is not that pulled commit. Compose files, Traefik dynamic routes, and `traefik.yml` all deploy this way. Traefik watches `compose_stacks/traefik/dynamic/`, so the pull is the route change.
+
+Change the files on the workstation. The owner commits and pushes. Then:
+
 ```bash
 git -C /mnt/cache/compose/homelab pull --ff-only
 docker compose -f /mnt/cache/compose/homelab/compose_stacks/<stack>/docker-compose.yml up -d
@@ -30,7 +34,7 @@ The project name is the directory that contains the compose file (`glances` for 
 
 `/usr/bin/git` ships with Unraid and is present after reboot. The remote is public: `https://github.com/Suraj-Ram/homelab.git`. No deploy key.
 
-Edit and commit on the workstation. The owner pushes. On the NAS, update with `git -C /mnt/cache/compose/homelab pull --ff-only`. Keep that pull out of `/boot/config/go`.
+Edit on the workstation. The owner commits and pushes. On the NAS, update with `git -C /mnt/cache/compose/homelab pull --ff-only` and only then deploy. Keep that pull out of `/boot/config/go`. A change that is not in the pushed commit stays on the workstation. Read-only `ssh nas` checks (`docker ps`, logs, inspect) are fine.
 
 If `/mnt/cache/compose/homelab` is missing:
 
@@ -80,7 +84,7 @@ That stash overwrites the learning stack and the hermes compose files. It is loc
 ## Working in this repo
 
 - Keep secrets out of git. `.env` files stay untracked. Name variables, not values.
-- Do not commit. The owner commits.
+- Do not commit. The owner commits and pushes. Do not deploy to the NAS ahead of that push.
 - Do not edit `archived/` except to read it.
 - When a change chooses between real alternatives, add `docs/decisions/NNNN-title.md` with the context, the options, the choice, and the consequences.
 

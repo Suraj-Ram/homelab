@@ -1,0 +1,16 @@
+---
+description: Deploy homelab changes only after a pushed commit is pulled on the NAS
+alwaysApply: true
+---
+
+# Deploy only from a pulled commit
+
+Do not write the NAS git checkout at `/mnt/cache/compose/homelab`, and do not apply stack or Traefik changes on the host, until that change is in a commit the owner has pushed and the NAS has pulled with `git pull --ff-only`.
+
+Forbidden:
+
+- `scp`, `rsync`, or any other copy of repo files onto the NAS checkout
+- Editing that checkout over `ssh nas`
+- `docker compose up`, container recreate, or a live route change from a file that is not the pulled commit
+
+Compose files, `compose_stacks/traefik/dynamic/`, and `traefik.yml` all follow this. Change them on the workstation. The owner commits and pushes. Then pull on the NAS and run compose from the checkout. Read-only `ssh nas` checks are fine. See `AGENTS.md`.
