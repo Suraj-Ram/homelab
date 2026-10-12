@@ -6,6 +6,8 @@ The first browser visit opens `/setup` to create the admin account. No license k
 
 Workflow files in `dags/` are mounted read-only. Edit them here, commit, and pull on the NAS. Run history, logs, and the auth secret stay in `/mnt/user/appdata/dagu`.
 
+The host Docker socket is mounted. `dags/prune-unused-images.yaml` uses it to delete images that no container is using, every day at 02:00 America/New_York.
+
 Before the first start, create that directory as Unraid's `nobody:users`:
 
 ```bash

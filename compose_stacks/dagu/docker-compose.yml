@@ -19,9 +19,12 @@ services:
       # Unraid nobody:users, so appdata stays readable on the share.
       PUID: "99"
       PGID: "100"
+      # Host docker group, from `getent group docker` on this NAS. The socket is mode 660.
+      DOCKER_GID: "281"
     volumes:
       - /mnt/user/appdata/dagu:/var/lib/dagu
       - ./dags:/var/lib/dagu/dags:ro
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - traefik-net
     labels:

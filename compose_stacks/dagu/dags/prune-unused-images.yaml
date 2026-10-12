@@ -1,0 +1,15 @@
+name: prune-unused-images
+description: Delete Docker images that no container is using. Runs at 02:00 America/New_York.
+
+schedule: "CRON_TZ=America/New_York 0 2 * * *"
+
+steps:
+  - id: prune
+    timeout_sec: 600
+    run: |
+      set -eu
+      curl -fsS --unix-socket /var/run/docker.sock \
+        -G -X POST \
+        --data-urlencode 'filters={"dangling":["false"]}' \
+        http://localhost/v1.54/images/prune \
+        | jq .
