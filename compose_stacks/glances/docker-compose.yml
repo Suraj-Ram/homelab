@@ -3,8 +3,9 @@ services:
     image: nicolargo/glances:4.5.7-full
     container_name: glances
     restart: unless-stopped
+    # Host PID keeps CPU, memory, and process stats from the NAS.
+    # The web UI listens on 61208 inside traefik-net only.
     pid: host
-    network_mode: host
     environment:
       TZ: America/New_York
       GLANCES_OPT: "-w"
@@ -13,9 +14,23 @@ services:
       - /etc/os-release:/etc/os-release:ro
       - /mnt/user:/mnt/user:ro
       - /boot:/boot:ro
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-net
+      - traefik.http.routers.glances.rule=Host(`glances.surajram.online`)
+      - traefik.http.routers.glances.entrypoints=websecure
+      - traefik.http.routers.glances.tls=true
+      - traefik.http.routers.glances.tls.certresolver=my-resolver
+      - traefik.http.services.glances.loadbalancer.server.port=61208
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:61208/api/4/status"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+networks:
+  traefik-net:
+    external: true
