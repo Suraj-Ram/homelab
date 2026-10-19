@@ -28,6 +28,14 @@ http:
       tls:
         certResolver: my-resolver
 
+    openspeedtest:
+      rule: Host(`speed.surajram.online`)
+      entryPoints:
+        - websecure
+      service: openspeedtest
+      tls:
+        certResolver: my-resolver
+
   # TODO: Investigate identity-aware access and narrower Tailscale ranges before
   # enabling this management-access middleware.
   # middlewares:
@@ -54,3 +62,9 @@ http:
         passHostHeader: true
         servers:
           - url: http://10.0.0.51:3001
+
+    openspeedtest:
+      loadBalancer:
+        passHostHeader: true
+        servers:
+          - url: http://10.0.0.51:3000

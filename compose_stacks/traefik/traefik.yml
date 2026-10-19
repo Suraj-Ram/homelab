@@ -20,6 +20,10 @@ entryPoints:
           permanent: true
   websecure:
     address: ":443"
+    transport:
+      respondingTimeouts:
+        # OpenSpeedTest posts up to 35MB. The default 60s cuts a slow upload.
+        readTimeout: 180s
   
 certificatesResolvers:
   my-resolver:
