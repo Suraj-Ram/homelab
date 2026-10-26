@@ -19,6 +19,6 @@ Option 1. The UI is `https://docker.surajram.online`. The router uses the `my-re
 
 Direct access remains `http://10.0.0.51:3001`. If the template's host port changes, the backend URL in `compose_stacks/traefik/dynamic/routes.yml` has to change with it. The file provider watches that directory, so a pull on the NAS updates the route without recreating Traefik.
 
-The container can read the Docker socket. The hostname is covered by the existing wildcard DNS record, which resolves to the LAN address and is not proxied by Cloudflare. Do not publish this route through a router WAN port-forward.
+The container can read the Docker socket. The hostname is covered by the existing wildcard DNS record (see [0008-dns-to-tailscale-ip.md](0008-dns-to-tailscale-ip.md)) and is not proxied by Cloudflare. Do not publish this route through a router WAN port-forward.
 
 Moving Dockhand into Compose later means removing the Unraid template as well. Otherwise Docker Manager can recreate `Dockhand` on the next boot and the two definitions will fight over the name and the appdata directory.

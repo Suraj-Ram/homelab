@@ -4,7 +4,7 @@
 
 Unraid's nginx originally listened on ports 80 and 443 of `10.0.0.51` and the Tailscale address. Traefik needs host ports 80 and 443 for normal HTTP and HTTPS URLs.
 
-`surajram.online` is delegated to Cloudflare. The apex and wildcard DNS records resolve to `10.0.0.51` and remain DNS-only so access stays on the LAN. They can later point to the NAS Tailscale address if access should instead be limited to the tailnet.
+`surajram.online` is delegated to Cloudflare. At the time of this decision, the apex and wildcard DNS records resolved to `10.0.0.51` and remained DNS-only so access stayed on the LAN. Public DNS later moved to the NAS Tailscale address; see [0008-dns-to-tailscale-ip.md](0008-dns-to-tailscale-ip.md).
 
 ## Options
 
@@ -20,7 +20,7 @@ Option 2. In **Settings → Management Access**, the Unraid HTTP port is `8080`,
 
 Each TLS router requests its own certificate through the `my-resolver` ACME resolver. It uses Cloudflare DNS-01 with `CF_DNS_API_TOKEN` from the untracked `.env`; challenge TXT records are temporary and are deleted after validation. Propagation checks use `1.1.1.1:53` and `8.8.8.8:53`. The ACME account email is configured in `traefik.yml`.
 
-`unraid.surajram.online` must resolve to `10.0.0.51`. File-provider backends continue to use `10.0.0.51`, because Traefik runs on the NAS.
+File-provider backends continue to use `10.0.0.51`, because Traefik runs on the NAS. Where the public names resolve is defined in [0008-dns-to-tailscale-ip.md](0008-dns-to-tailscale-ip.md).
 
 ## Consequences
 
