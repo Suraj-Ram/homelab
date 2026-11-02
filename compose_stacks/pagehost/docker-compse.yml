@@ -1,7 +1,8 @@
 services:
   pagehost:
-    build: .
-    image: pagehost:local
+    image: ghcr.io/suraj-ram/pagehost:latest
+    container_name: pagehost
+    restart: unless-stopped
     environment:
       PAGEHOST_TOKEN: token-doesnt-matter-yet
       PAGEHOST_BASE_URL: https://pages.surajram.online
@@ -25,7 +26,6 @@ services:
       timeout: 3s
       retries: 12
       start_period: 15s
-    restart: unless-stopped
 
   nginx:
     image: nginx:1.28-alpine
