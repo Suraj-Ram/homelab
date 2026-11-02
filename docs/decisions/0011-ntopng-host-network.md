@@ -21,7 +21,7 @@ Capturing on `br0` (or `eth0` / `bond0` if bridging is off) only shows traffic t
 Option 3.
 
 - Image: `ntop/ntopng:latest` pinned by digest (Hub's stable channel; there is no `:stable` tag), Community edition (`--community`), no license mount.
-- Capture: host networking, `NET_ADMIN` + `NET_RAW`, interface hardcoded as `br0` in Compose (confirm with `ip -br link` on the NAS before first start; edit `-i` if needed).
+- Capture: host networking, `NET_ADMIN` + `NET_RAW`, interface from Compose `environment.NTOPNG_INTERFACE` (default `br0`; confirm with `ip -br link` on the NAS before first start). No `.env` file.
 - Web UI: bind `127.0.0.1:3009` so the UI is not on the LAN/Tailscale address directly; Traefik on the same host proxies it.
 - Redis: `redis:7-alpine` in the same Compose project, AOF on `/mnt/user/appdata/ntopng/redis`, published only as `127.0.0.1:16379:6379` so host-networked ntopng reaches it without exposing Redis on the LAN.
 - Data: `/mnt/user/appdata/ntopng/data` → `/var/lib/ntopng`.
