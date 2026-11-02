@@ -3,8 +3,8 @@ services:
     build: .
     image: pagehost:local
     environment:
-      PAGEHOST_TOKEN: ${PAGEHOST_TOKEN:?set PAGEHOST_TOKEN}
-      PAGEHOST_BASE_URL: ${PAGEHOST_BASE_URL:-https://pages.surajram.online}
+      PAGEHOST_TOKEN: token-doesnt-matter-yet
+      PAGEHOST_BASE_URL: https://pages.surajram.online
       PAGEHOST_DATA_DIR: /data
     volumes:
       - /mnt/user/appdata/pagehost:/data
