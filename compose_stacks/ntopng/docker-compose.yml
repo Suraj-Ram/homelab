@@ -38,16 +38,15 @@ services:
       - NET_RAW
     environment:
       TZ: America/New_York
-      # Override on the NAS if the LAN bridge is not br0 (check: ip -br link).
-      NTOPNG_INTERFACE: ${NTOPNG_INTERFACE:-br0}
     volumes:
       - /mnt/user/appdata/ntopng/data:/var/lib/ntopng
     # Community edition. UI on loopback:3009 (3000 is OpenSpeedTest).
     # Redis at host-published 127.0.0.1:16379. Local net matches 10.0.0.51/24.
+    # Capture interface is br0 on this Unraid host; change -i if ip -br link differs.
     command:
       - --community
       - -i
-      - ${NTOPNG_INTERFACE:-br0}
+      - br0
       - -w
       - 127.0.0.1:3009
       - -r
