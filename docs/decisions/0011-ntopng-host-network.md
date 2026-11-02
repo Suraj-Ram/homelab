@@ -41,7 +41,7 @@ Do not use host port `3000`. Do not load PF_RING on Unraid for this stack. Do no
 Deploy after appdata exists and the capture interface is confirmed:
 
 ```bash
-ip -br link
+ip -br link   # set environment.NTOPNG_INTERFACE in Compose if not br0
 mkdir -p /mnt/user/appdata/ntopng/{data,redis}
 git -C /mnt/cache/compose/homelab pull --ff-only
 docker compose -f /mnt/cache/compose/homelab/compose_stacks/ntopng/docker-compose.yml up -d
