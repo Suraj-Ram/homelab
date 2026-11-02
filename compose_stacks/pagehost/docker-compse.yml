@@ -1,0 +1,59 @@
+services:
+  pagehost:
+    build: .
+    image: pagehost:local
+    environment:
+      PAGEHOST_TOKEN: ${PAGEHOST_TOKEN:?set PAGEHOST_TOKEN}
+      PAGEHOST_BASE_URL: ${PAGEHOST_BASE_URL:-https://pages.surajram.online}
+      PAGEHOST_DATA_DIR: /data
+    volumes:
+      - /mnt/user/appdata/pagehost:/data
+      - /mnt/user/appdata/pagehost/sites:/data/sites
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-net
+      - traefik.http.routers.pagehost.rule=Host(`pagehost.surajram.online`)
+      - traefik.http.routers.pagehost.entrypoints=websecure
+      - traefik.http.routers.pagehost.tls=true
+      - traefik.http.routers.pagehost.tls.certresolver=my-resolver
+      - traefik.http.services.pagehost.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.create_connection(('127.0.0.1', 8080), 2); s.close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.28-alpine
+    depends_on:
+      pagehost:
+        condition: service_healthy
+    volumes:
+      - /mnt/user/appdata/pagehost/sites:/srv/pages:ro
+      - ./nginx_conf/pages.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx_conf/pagehost-security.conf:/etc/nginx/snippets/pagehost-security.conf:ro
+    networks:
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-net
+      - traefik.http.routers.pagehost-pages.rule=Host(`pages.surajram.online`)
+      - traefik.http.routers.pagehost-pages.entrypoints=websecure
+      - traefik.http.routers.pagehost-pages.tls=true
+      - traefik.http.routers.pagehost-pages.tls.certresolver=my-resolver
+      - traefik.http.services.pagehost-pages.loadbalancer.server.port=80
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/_assets/pagehost.css"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      start_period: 5s
+    restart: unless-stopped
+
+networks:
+  traefik-net:
+    external: true
