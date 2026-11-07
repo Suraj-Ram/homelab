@@ -1,6 +1,6 @@
-# Ingest for containers on the otel network. Nothing is published on the host.
-# The collector defaults to localhost; 0.0.0.0 is the container interface so
-# other containers on that network can connect.
+# Log ingest for containers on the otel network. The collector publishes no ports.
+# It listens on 0.0.0.0 inside the container because the image defaults to localhost.
+# There is no traces pipeline and no metrics pipeline. Those signals are refused.
 
 receivers:
   otlp:
@@ -11,7 +11,7 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 processors:
-  # First in every pipeline. Unraid does not enforce Compose memory limits.
+  # First in the pipeline. Unraid does not enforce Compose memory limits.
   memory_limiter:
     check_interval: 1s
     limit_mib: 256
@@ -21,12 +21,11 @@ processors:
     send_batch_size: 1024
 
 exporters:
-  # Counts batches. basic does not print span bodies or attributes.
-  # This does not store telemetry. A backend exporter replaces it later.
-  debug:
-    verbosity: basic
-    sampling_initial: 5
-    sampling_thereafter: 200
+  # Loki's native OTLP endpoint. The exporter appends /v1/logs.
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
 
 extensions:
   health_check:
@@ -35,15 +34,7 @@ extensions:
 service:
   extensions: [health_check]
   pipelines:
-    traces:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [debug]
-    metrics:
-      receivers: [otlp]
-      processors: [memory_limiter, batch]
-      exporters: [debug]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [debug]
+      exporters: [otlp_http/loki]

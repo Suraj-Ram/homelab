@@ -34,8 +34,9 @@ services:
     #     limits:
     #       memory: 4G
     #       cpus: "2.0"
-    # Gateway OTLP goes to otel-collector on this network. The endpoint is set in
-    # /mnt/user/appdata/hermes/config.yaml. See docs/decisions/0011-otel-collector-docker-network.md.
+    # Gateway logs go to otel-collector on this network, then Loki. The collector
+    # refuses traces. The endpoint is set in /mnt/user/appdata/hermes/config.yaml.
+    # See docs/decisions/0011-otel-collector-docker-network.md.
     networks:
       - otel
 
