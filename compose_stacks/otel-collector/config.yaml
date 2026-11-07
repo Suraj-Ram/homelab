@@ -1,0 +1,49 @@
+# Ingest for containers on the otel network. Nothing is published on the host.
+# The collector defaults to localhost; 0.0.0.0 is the container interface so
+# other containers on that network can connect.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # First in every pipeline. Unraid does not enforce Compose memory limits.
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+
+exporters:
+  # Counts batches. basic does not print span bodies or attributes.
+  # This does not store telemetry. A backend exporter replaces it later.
+  debug:
+    verbosity: basic
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [debug]

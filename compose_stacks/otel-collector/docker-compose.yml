@@ -1,0 +1,25 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector:0.165.0
+    container_name: otel-collector
+    restart: unless-stopped
+    command:
+      - --config=/etc/otelcol/config.yaml
+    environment:
+      TZ: America/New_York
+    volumes:
+      - ./config.yaml:/etc/otelcol/config.yaml:ro
+    # No ports. Reachable only as otel-collector on the otel network.
+    # gRPC 4317, HTTP 4318, health_check 13133.
+    networks:
+      - otel
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  otel:
+    external: true
+    name: otel
