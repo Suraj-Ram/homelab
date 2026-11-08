@@ -1,0 +1,58 @@
+# Ingest for containers on otel-observability-net. The collector publishes no ports.
+# It listens on 0.0.0.0 inside the container because the image defaults to localhost.
+# Logs go to Loki. Metrics are remote-written to Prometheus. Traces are refused.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # First in every pipeline. Unraid does not enforce Compose memory limits.
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+    spike_limit_mib: 64
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+
+exporters:
+  # Loki's native OTLP endpoint. The exporter appends /v1/logs.
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+    tls:
+      insecure: true
+  # One consumer so a stock Prometheus does not reject samples as out of order.
+  prometheus_remote_write:
+    http:
+      endpoint: http://10.0.0.51:9090/api/v1/write
+      tls:
+        insecure: true
+    external_labels:
+      host_name: s-nas
+    remote_write_queue:
+      num_consumers: 1
+    max_batch_request_parallelism: 1
+    resource_constant_labels:
+      included:
+        - service.name
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  extensions: [health_check]
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/loki]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus_remote_write]

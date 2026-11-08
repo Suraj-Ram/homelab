@@ -1,0 +1,20 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector:0.165.0
+    container_name: otel-collector
+    restart: unless-stopped
+    command:
+      - --config=/etc/otelcol/config.yaml
+    environment:
+      TZ: America/New_York
+    volumes:
+      - ./config.yaml:/etc/otelcol/config.yaml:ro
+    # No ports. Reachable only as otel-collector on otel-observability-net.
+    # gRPC 4317, HTTP 4318, health_check 13133. Logs and metrics. No traces.
+    networks:
+      - otel-observability-net
+
+networks:
+  otel-observability-net:
+    external: true
+    name: otel-observability-net
