@@ -28,7 +28,7 @@ Option 2 for the network. Option 1 for the signals. Option 1 for Loki.
 
 `otel/opentelemetry-collector:0.165.0` runs as `otel-collector` and is attached only to the external Docker network `otel-observability-net`. Compose does not publish collector ports. The OTLP receiver listens on `0.0.0.0` inside the container, which is required because the image defaults to localhost and other containers would not be able to connect. From the host, the LAN, and the tailnet there is no collector listener.
 
-The logs pipeline is `memory_limiter` (256 MiB), then `batch`, then `otlp_http` to `http://loki:3100/otlp`. The metrics pipeline uses the same processors, then `prometheus_remote_write` to `PROMETHEUS_REMOTE_WRITE_URL`, defaulting to `http://10.0.0.51:9090/api/v1/write`. One remote-write consumer keeps sample order for a stock Prometheus. Prometheus must be started with `--web.enable-remote-write-receiver`. Unraid on this host does not enforce Compose `deploy.resources` limits, so the memory limiter is the collector's cap.
+The logs pipeline is `memory_limiter` (256 MiB), then `batch`, then `otlp_http` to `http://loki:3100/otlp`. The metrics pipeline uses the same processors, then `prometheus_remote_write` to `http://10.0.0.51:9090/api/v1/write`. One remote-write consumer keeps sample order for a stock Prometheus. Prometheus must be started with `--web.enable-remote-write-receiver`. Unraid on this host does not enforce Compose `deploy.resources` limits, so the memory limiter is the collector's cap.
 
 Grafana Loki `3.7.9` is `compose_stacks/loki`. It stores chunks on `/mnt/user/appdata/loki`, deletes them after 7 days, and runs as Unraid `nobody:users` (`99:100`). Anonymous usage reporting is off. Its HTTP port is published as `10.0.0.51:3100` because Grafana is not on `otel-observability-net`. The collector does not use that published port.
 
@@ -60,7 +60,7 @@ OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
 OTEL_SERVICE_NAME=<service>
 ```
 
-In Grafana, add a Loki datasource at `http://10.0.0.51:3100`. Leave the existing Prometheus datasource as it is. Copy `compose_stacks/otel-collector/.env.example` to `.env` when Prometheus remote write is not on port 9090.
+In Grafana, add a Loki datasource at `http://10.0.0.51:3100`. Leave the existing Prometheus datasource as it is.
 
 The collector health check listens on `otel-collector:13133` on `otel-observability-net`. Neither the collector image nor the Loki image has a shell or curl, so Compose has no HTTP healthcheck.
 

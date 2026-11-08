@@ -7,8 +7,6 @@ services:
       - --config=/etc/otelcol/config.yaml
     environment:
       TZ: America/New_York
-      # Prometheus remote-write receiver. Override in .env if yours is elsewhere.
-      PROMETHEUS_REMOTE_WRITE_URL: ${PROMETHEUS_REMOTE_WRITE_URL:-http://10.0.0.51:9090/api/v1/write}
     volumes:
       - ./config.yaml:/etc/otelcol/config.yaml:ro
     # No ports. Reachable only as otel-collector on otel-observability-net.

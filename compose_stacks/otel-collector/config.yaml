@@ -29,7 +29,7 @@ exporters:
   # One consumer so a stock Prometheus does not reject samples as out of order.
   prometheus_remote_write:
     http:
-      endpoint: ${env:PROMETHEUS_REMOTE_WRITE_URL}
+      endpoint: http://10.0.0.51:9090/api/v1/write
       tls:
         insecure: true
     external_labels:
