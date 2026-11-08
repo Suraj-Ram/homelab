@@ -28,9 +28,19 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    # The gateway, its local terminal, and code_execution Python share this
+    # network, so they can reach otel-collector. default stays attached.
+    networks:
+      - default
+      - otel-observability-net
     # not supported in kernel version
     # deploy:
     #   resources:
     #     limits:
     #       memory: 4G
     #       cpus: "2.0"
+
+networks:
+  otel-observability-net:
+    external: true
+    name: otel-observability-net
