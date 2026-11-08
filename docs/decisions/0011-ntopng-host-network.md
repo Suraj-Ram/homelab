@@ -22,10 +22,10 @@ Option 3.
 
 - Image: `ntop/ntopng:latest` pinned by digest (Hub's stable channel; there is no `:stable` tag), Community edition (`--community`), no license mount.
 - Capture: host networking, `NET_ADMIN` + `NET_RAW`, interface from Compose `environment.NTOPNG_INTERFACE` (default `br0`; confirm with `ip -br link` on the NAS before first start). No `.env` file.
-- Web UI: bind `127.0.0.1:3009` so the UI is not on the LAN/Tailscale address directly; Traefik on the same host proxies it.
+- Web UI: bind `10.0.0.51:3009` (LAN IP only, not Tailscale). Traefik runs on `traefik-net`, so a loopback bind is unreachable — `127.0.0.1` inside Traefik is Traefik's own loopback. Same host-IP pattern as Grafana / Dockhand / OpenSpeedTest.
 - Redis: `redis:7-alpine` in the same Compose project, AOF on `/mnt/user/appdata/ntopng/redis`, published only as `127.0.0.1:16379:6379` so host-networked ntopng reaches it without exposing Redis on the LAN.
 - Data: `/mnt/user/appdata/ntopng/data` → `/var/lib/ntopng`.
-- HTTPS: file-provider route `ntop.surajram.online` → `http://127.0.0.1:3009` in `compose_stacks/traefik/dynamic/routes.yml`. Docker labels cannot attach this container to `traefik-net` while it uses host networking.
+- HTTPS: file-provider route `ntop.surajram.online` → `http://10.0.0.51:3009` in `compose_stacks/traefik/dynamic/routes.yml`. Docker labels cannot attach this container to `traefik-net` while it uses host networking.
 - Local networks: `10.0.0.0/24` to match the NAS LAN address `10.0.0.51`.
 
 ## Consequences
@@ -34,7 +34,7 @@ ntopng sees only traffic on the chosen host interface(s). Without SPAN or flow e
 
 Redis must stay up for preferences and auth. Publishing Redis only on loopback avoids a LAN-open Redis while still working with host-networked ntopng. If host port `16379` is already taken, change the left-hand publish port and the `-r` argument together.
 
-Default login is `admin` / `admin`; ntopng forces a password change on first visit. Change it immediately. Access remains gated by Tailscale ACLs on ports 80/443 like other Traefik hostnames ([0008](0008-dns-to-tailscale-ip.md)).
+The UI is reachable on the LAN at `http://10.0.0.51:3009` as well as through Traefik. Prefer `https://ntop.surajram.online`. Default login is `admin` / `admin`; ntopng forces a password change on first visit. Change it immediately. Remote access remains gated by Tailscale ACLs on ports 80/443 like other Traefik hostnames ([0008](0008-dns-to-tailscale-ip.md)).
 
 Do not use host port `3000`. Do not load PF_RING on Unraid for this stack. Do not deploy until this change is pushed and the NAS has `git pull --ff-only`.
 

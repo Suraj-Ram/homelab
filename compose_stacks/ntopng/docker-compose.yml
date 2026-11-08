@@ -42,15 +42,16 @@ services:
       NTOPNG_INTERFACE: br0
     volumes:
       - /mnt/user/appdata/ntopng/data:/var/lib/ntopng
-    # Community edition. UI on loopback:3009 (3000 is OpenSpeedTest).
-    # Redis at host-published 127.0.0.1:16379. Local net matches 10.0.0.51/24.
+    # Community edition. UI on the LAN IP:3009 (3000 is OpenSpeedTest).
+    # Traefik runs on traefik-net, so it must reach the host via 10.0.0.51, not
+    # 127.0.0.1 (that would be Traefik's own loopback). Redis stays on loopback.
     # Shell so -i reads NTOPNG_INTERFACE from environment above ($$ -> $ in container).
     entrypoint: ["/bin/bash", "-c"]
     command:
       - >-
         exec ntopng --community
         -i "$$NTOPNG_INTERFACE"
-        -w 127.0.0.1:3009
+        -w 10.0.0.51:3009
         -r 127.0.0.1:16379@0
         -m 10.0.0.0/24
 
@@ -58,7 +59,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "timeout 5 bash -c ':> /dev/tcp/127.0.0.1/3009' || exit 1",
+          "timeout 5 bash -c ':> /dev/tcp/10.0.0.51/3009' || exit 1",
         ]
       interval: 30s
       timeout: 10s
