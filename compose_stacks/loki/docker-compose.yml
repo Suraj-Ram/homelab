@@ -11,13 +11,13 @@ services:
     volumes:
       - ./loki-config.yaml:/etc/loki/config.yaml:ro
       - /mnt/user/appdata/loki:/loki
-    # Query API for the Unraid Grafana container, which is not on otel.
+    # Query API for the Unraid Grafana container, which is not on otel-observability-net.
     # Bound to the LAN address so it is not also listening on the Tailscale address.
-    # The collector writes to loki:3100 on the otel network and does not use this port.
+    # The collector writes to loki:3100 on otel-observability-net and does not use this port.
     ports:
       - "10.0.0.51:3100:3100"
     networks:
-      - otel
+      - otel-observability-net
     logging:
       driver: json-file
       options:
@@ -25,6 +25,6 @@ services:
         max-file: "3"
 
 networks:
-  otel:
+  otel-observability-net:
     external: true
-    name: otel
+    name: otel-observability-net

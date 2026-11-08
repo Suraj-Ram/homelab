@@ -1,5 +1,5 @@
 # Single-binary Loki. Filesystem storage under /loki, mounted from
-# /mnt/user/appdata/loki. The collector on the otel network writes OTLP here.
+# /mnt/user/appdata/loki. The collector on otel-observability-net writes OTLP here.
 
 auth_enabled: false
 
