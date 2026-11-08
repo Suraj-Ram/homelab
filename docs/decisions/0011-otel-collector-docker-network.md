@@ -34,8 +34,6 @@ Grafana Loki `3.7.9` is `compose_stacks/loki`. It stores chunks on `/mnt/user/ap
 
 A Compose service joins `otel-observability-net` beside `traefik-net` when it also needs Traefik. Hermes stays off this network until its export is added.
 
-The operator page for this layout is `compose_stacks/pagehost/pages/otel-collector.md`. Pagehost renders it. The page id is assigned at publish time.
-
 ## Consequences
 
 Create the network and the Loki data directory once. Start Loki, then the collector:
