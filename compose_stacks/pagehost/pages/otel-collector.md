@@ -24,20 +24,6 @@ OTEL_SERVICE_NAME=the-service
 
 gRPC is `otel-collector:4317` with no URL scheme. HTTP is port 4318.
 
-Hermes does not read those variables. Its gateway export is content-free (health and diagnostics, not prompts). Put this in `/mnt/user/appdata/hermes/config.yaml`, then recreate the container:
-
-```yaml
-monitoring:
-  gateway_health_export:
-    enabled: true
-  export:
-    otlp:
-      enabled: true
-      endpoint: http://otel-collector:4318/v1/traces
-```
-
-Hermes builds the logs and metrics URLs from that path. Logs are stored. Metrics are stored. Trace posts are refused, and the gateway keeps running. Do not set `OTEL_EXPORTER_OTLP_ENDPOINT` on Hermes. A later image can treat that variable as the switch for an export that includes prompt text.
-
 ## Run Loki
 
 Loki is its own Compose stack, `compose_stacks/loki`. The image is `grafana/loki:3.7.9`. It stores chunks on `/mnt/user/appdata/loki` and deletes them after 7 days. The process runs as Unraid `nobody:users` (`99:100`). Anonymous usage reporting is off.
