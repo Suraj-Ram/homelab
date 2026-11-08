@@ -7,37 +7,12 @@ services:
       - --config=/etc/otelcol/config.yaml
     environment:
       TZ: America/New_York
+      # Prometheus remote-write receiver. Override in .env if yours is elsewhere.
+      PROMETHEUS_REMOTE_WRITE_URL: ${PROMETHEUS_REMOTE_WRITE_URL:-http://10.0.0.51:9090/api/v1/write}
     volumes:
       - ./config.yaml:/etc/otelcol/config.yaml:ro
     # No ports. Reachable only as otel-collector on the otel network.
-    # gRPC 4317, HTTP 4318, health_check 13133. Logs only.
-    networks:
-      - otel
-    depends_on:
-      - loki
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  loki:
-    image: grafana/loki:3.7.9
-    container_name: loki
-    restart: unless-stopped
-    user: "99:100"
-    command:
-      - -config.file=/etc/loki/config.yaml
-    environment:
-      TZ: America/New_York
-    volumes:
-      - ./loki-config.yaml:/etc/loki/config.yaml:ro
-      - /mnt/user/appdata/loki:/loki
-    # Query API for the Unraid Grafana container, which is not on this network.
-    # Bound to the LAN address so it is not also listening on the Tailscale address.
-    # The collector writes over the otel network and does not use this port.
-    ports:
-      - "10.0.0.51:3100:3100"
+    # gRPC 4317, HTTP 4318, health_check 13133. Logs and metrics. No traces.
     networks:
       - otel
     logging:
