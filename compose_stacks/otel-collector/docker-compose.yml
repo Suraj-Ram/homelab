@@ -11,10 +11,10 @@ services:
       PROMETHEUS_REMOTE_WRITE_URL: ${PROMETHEUS_REMOTE_WRITE_URL:-http://10.0.0.51:9090/api/v1/write}
     volumes:
       - ./config.yaml:/etc/otelcol/config.yaml:ro
-    # No ports. Reachable only as otel-collector on the otel network.
+    # No ports. Reachable only as otel-collector on otel-observability-net.
     # gRPC 4317, HTTP 4318, health_check 13133. Logs and metrics. No traces.
     networks:
-      - otel
+      - otel-observability-net
     logging:
       driver: json-file
       options:
@@ -22,6 +22,6 @@ services:
         max-file: "3"
 
 networks:
-  otel:
+  otel-observability-net:
     external: true
-    name: otel
+    name: otel-observability-net

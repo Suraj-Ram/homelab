@@ -1,4 +1,4 @@
-# Ingest for containers on the otel network. The collector publishes no ports.
+# Ingest for containers on otel-observability-net. The collector publishes no ports.
 # It listens on 0.0.0.0 inside the container because the image defaults to localhost.
 # Logs go to Loki. Metrics are remote-written to Prometheus. Traces are refused.
 

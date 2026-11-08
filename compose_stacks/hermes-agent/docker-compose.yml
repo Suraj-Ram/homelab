@@ -35,13 +35,13 @@ services:
     #       memory: 4G
     #       cpus: "2.0"
     # Gateway logs go to Loki and metrics to Prometheus, through otel-collector
-    # on this network. The collector refuses traces. The endpoint is set in
-    # /mnt/user/appdata/hermes/config.yaml.
+    # on otel-observability-net. The collector refuses traces. The endpoint is
+    # set in /mnt/user/appdata/hermes/config.yaml.
     # See docs/decisions/0011-otel-collector-docker-network.md.
     networks:
-      - otel
+      - otel-observability-net
 
 networks:
-  otel:
+  otel-observability-net:
     external: true
-    name: otel
+    name: otel-observability-net
