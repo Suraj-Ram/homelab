@@ -15,11 +15,6 @@ services:
     # gRPC 4317, HTTP 4318, health_check 13133. Logs and metrics. No traces.
     networks:
       - otel-observability-net
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
 
 networks:
   otel-observability-net:
