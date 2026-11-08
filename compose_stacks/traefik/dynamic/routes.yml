@@ -77,9 +77,10 @@ http:
         servers:
           - url: http://10.0.0.51:3000
 
-    # Host-networked ntopng binds the UI to loopback only (see 0011).
+    # Host-networked ntopng listens on the LAN IP (see 0011). Traefik is not
+    # on the host network, so 127.0.0.1 here would miss the UI.
     ntopng:
       loadBalancer:
         passHostHeader: true
         servers:
-          - url: http://127.0.0.1:3009
+          - url: http://10.0.0.51:3009
