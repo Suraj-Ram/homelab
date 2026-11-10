@@ -4,9 +4,6 @@ services:
     container_name: hermes
     restart: unless-stopped
     command: gateway run
-    ports:
-      - "8642:8642"
-      - "9119:9119"
     volumes:
       - /mnt/user/appdata/hermes:/opt/data
     environment:
@@ -15,8 +12,15 @@ services:
       HERMES_DASHBOARD_BASIC_AUTH_USERNAME: ${HERMES_DASHBOARD_BASIC_AUTH_USERNAME}
       HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: ${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD}
       HERMES_DASHBOARD_BASIC_AUTH_SECRET: ${HERMES_DASHBOARD_BASIC_AUTH_SECRET}
-    # The gateway API binds 127.0.0.1 inside the container, so host port 8642
-    # resets. The dashboard on 9119 answers on the host and reports gateway_running.
+      # Browser origin for the Traefik route. The image binds the dashboard
+      # on 0.0.0.0, so Traefik on traefik-net can reach 9119.
+      HERMES_DASHBOARD_PUBLIC_URL: https://hermes.surajram.online
+      # The API server defaults to 127.0.0.1, which Traefik cannot reach.
+      API_SERVER_ENABLED: "true"
+      API_SERVER_HOST: 0.0.0.0
+      API_SERVER_KEY: ${API_SERVER_KEY}
+    # Neither port is published. Traefik reaches 9119 and 8642 on traefik-net.
+    # The healthcheck uses the container's own loopback.
     healthcheck:
       test:
         - CMD-SHELL
@@ -28,11 +32,28 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    # The gateway, its local terminal, and code_execution Python share this
-    # network, so they can reach otel-collector. default stays attached.
+    # The gateway, its local terminal, and code_execution Python share default.
+    # otel-observability-net reaches the collector. traefik-net is the only
+    # path to the dashboard and the API server.
     networks:
       - default
       - otel-observability-net
+      - traefik-net
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-net
+      - traefik.http.routers.hermes.rule=Host(`hermes.surajram.online`)
+      - traefik.http.routers.hermes.entrypoints=websecure
+      - traefik.http.routers.hermes.tls=true
+      - traefik.http.routers.hermes.tls.certresolver=my-resolver
+      - traefik.http.routers.hermes.service=hermes
+      - traefik.http.services.hermes.loadbalancer.server.port=9119
+      - traefik.http.routers.hermesapi.rule=Host(`hermesapi.surajram.online`)
+      - traefik.http.routers.hermesapi.entrypoints=websecure
+      - traefik.http.routers.hermesapi.tls=true
+      - traefik.http.routers.hermesapi.tls.certresolver=my-resolver
+      - traefik.http.routers.hermesapi.service=hermesapi
+      - traefik.http.services.hermesapi.loadbalancer.server.port=8642
     # not supported in kernel version
     # deploy:
     #   resources:
@@ -44,3 +65,5 @@ networks:
   otel-observability-net:
     external: true
     name: otel-observability-net
+  traefik-net:
+    external: true

@@ -4,7 +4,7 @@
 
 Services on this NAS should send logs and metrics with OTLP. Traces wait until there is a trace store. The host is one Unraid machine (i7-4790, 16 GB, no VMs). Grafana at `grafana.surajram.online` is an Unraid-managed container. Prometheus is already running for that Grafana. Glances shows host CPU, memory, and disks.
 
-`*.surajram.online` resolves to the NAS Tailscale address. A published collector port or a Traefik route would be reachable by tailnet peers that can reach the node. Hermes is not on `traefik-net`. Its export to this collector waits.
+`*.surajram.online` resolves to the NAS Tailscale address. A published collector port or a Traefik route would be reachable by tailnet peers that can reach the node. Hermes did not need `traefik-net` for the collector. Its export to this collector waits.
 
 ## Options
 
@@ -32,7 +32,7 @@ The logs pipeline is `memory_limiter` (256 MiB), then `batch`, then `otlp_http` 
 
 Grafana Loki `3.7.9` is `compose_stacks/loki`. It stores chunks on `/mnt/user/appdata/loki`, deletes them after 7 days, and runs as Unraid `nobody:users` (`99:100`). Anonymous usage reporting is off. Its HTTP port is published as `10.0.0.51:3100` because Grafana is not on `otel-observability-net`. The collector does not use that published port.
 
-A Compose service joins `otel-observability-net` beside `traefik-net` when it also needs Traefik. Hermes stays off this network until its export is added.
+A Compose service joins `otel-observability-net` beside `traefik-net` when it also needs Traefik. Hermes joins both ([0012](0012-hermes-dashboard-traefik.md)). Sending to the collector is still a separate change.
 
 ## Consequences
 

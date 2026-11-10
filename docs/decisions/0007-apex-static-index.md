@@ -24,7 +24,7 @@ Edit the page in this repo. After the owner pushes and the NAS pulls, nginx read
 
 The apex certificate is its own DNS-01 certificate. The page is unreachable when Traefik is down. The host-port links keep working at `10.0.0.51`.
 
-Give Hermes a hostname later by adding a route and changing the matching link in `public/index.html`. Do not publish this route through a router WAN port-forward.
+The dashboard hostname is `https://hermes.surajram.online` ([0012](0012-hermes-dashboard-traefik.md)). Hermes Web UI stays on `10.0.0.51:8787`. Do not publish either through a router WAN port-forward.
 
 Deploy after the pull:
 
